@@ -55,6 +55,10 @@ declare %unit:test function stack-test:initialize-stack-of-cdata() {
   unit:assert-equals(stack:initialize(("1", "2", "elephant", "3")), $stack-test:cdata-stack)
 };
 
+declare %unit:test function stack-test:initialize-empty-stack() {
+  unit:assert-equals(stack:initialize(()), <stack/>)
+};
+
 (: test initialize on stack of stacks and on stack of elements :)
 
 declare %unit:test function stack-test:pop-stack-of-cdata-returned-value() {
