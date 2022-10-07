@@ -10,6 +10,8 @@ xquery version "3.0";
 :                  sorting algorithsm. 
 :)
 module namespace sort="http://wlpotter.github.io/ns/sort";
+import module namespace functx="http://www.functx.com";
+
 
 
 (:----------------
@@ -62,3 +64,55 @@ as item()+
   ------------------:)
   
   (: Additional sorting algorithms TBD :)
+  
+(:-----------------
+  Useful comparison functions
+  -----------------:)
+  
+(:
+: Numerically compares number strings (normal 'order by' or fn:sort treats numerical strings as strings, so '100' precedes '99').
+: Useful for numerically comparing numerical subsections (e.g., 1.1.1 vs 1.1.2)
+: the $separator parameter controls what divides portions of a multi-sectioned number (e.g., '.')
+:)
+declare function sort:numeric-compare-deep($x as xs:string, $y as xs:string, $separator as xs:string)
+as xs:string
+{
+  let $xNow := functx:substring-before-if-contains($x, $separator)
+  let $xRest := substring-after($x, $separator)
+  let $yNow :=  functx:substring-before-if-contains($y, $separator)
+  let $yRest := substring-after($y, $separator)
+  return 
+    if ($xNow = "" or $yNow = "") then "one or more parameters are empty"
+    else if(xs:integer($xNow) < xs:integer($yNow)) then "less than"
+    else if (xs:integer($xNow) > xs:integer($yNow)) then "greater than"
+    else if(xs:integer($xNow) = xs:integer($yNow)) then
+      if ($xRest = "" and $yRest = "") then "equal to"
+      else if($xRest = "" and $yRest != "") then "less than"
+      else if($xRest != "" and $yRest = "") then "greater than"
+      else sort:numeric-compare-deep($xRest, $yRest, $separator)
+  else()
+};
+
+(: returns true() if the left parameter is smaller than the right paramater, according
+   to the logic of the sort:numerical-comparison-deep function. :)
+declare function sort:numeric-le-deep($x as xs:string, $y as xs:string, $separator as xs:string)
+as xs:boolean
+{
+  sort:numeric-compare-deep($x, $y, $separator) = "less than"
+};
+
+(: returns true() if the left parameter is larger than the right paramater, according
+   to the logic of the sort:numerical-comparison-deep function. :)
+declare function sort:numeric-ge-deep($x as xs:string, $y as xs:string, $separator as xs:string)
+as xs:boolean
+{
+  sort:numeric-compare-deep($x, $y, $separator) = "greater than"
+};
+
+(: returns true() if the left parameter is equal to the right paramater, according
+   to the logic of the sort:numerical-comparison-deep function. :)
+declare function sort:numeric-eq-deep($x as xs:string, $y as xs:string, $separator as xs:string)
+as xs:boolean
+{
+  sort:numeric-compare-deep($x, $y, $separator) = "equal to"
+};
