@@ -23,8 +23,7 @@ as item()+
 {
   if ($length = 1) then
     $toSort
-  else 
-  (: left is 1, count(seq)/2; right is count(seq)/2+:)
+  else
     let $mid := xs:integer($length div 2)
     let $left := $toSort[position() = (1 to $mid)]
     let $right := $toSort[position() = (($mid + 1) to $length)]
@@ -77,6 +76,8 @@ as item()+
 declare function sort:numeric-compare-deep($x as xs:string, $y as xs:string, $separator as xs:string)
 as xs:string
 {
+  let $x := functx:substring-before-if-contains($x, "-")
+  let $y := functx:substring-before-if-contains($y, "-")
   let $xNow := functx:substring-before-if-contains($x, $separator)
   let $xRest := substring-after($x, $separator)
   let $yNow :=  functx:substring-before-if-contains($y, $separator)
@@ -116,3 +117,4 @@ as xs:boolean
 {
   sort:numeric-compare-deep($x, $y, $separator) = "equal to"
 };
+
