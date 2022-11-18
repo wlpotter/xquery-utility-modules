@@ -19,7 +19,7 @@ import module namespace functx="http://www.functx.com";
 : characters
 :)
 
-declare function strfy:stringify-node($node as node())
+declare function strfy:stringify-node($node as node(), $options as map(*)?)
 as xs:string
 {
   
@@ -33,9 +33,10 @@ as xs:string
     for $child in $node/child::node()
     return switch(functx:node-kind($child))
       case "text" return $child
-      case "element" return strfy:stringify-node($child)
+      case "element" return strfy:stringify-node($child, $options)
       case "comment" return $child
       default return ""
   let $descendantString := string-join($descendantString)
-  return "&lt;"||$nodeName||$attrString||"&gt;"||$descendantString||"&lt;/"||$nodeName||"&gt;"
+  let $nodeString := "&lt;"||$nodeName||$attrString||"&gt;"||$descendantString||"&lt;/"||$nodeName||"&gt;"
+  return if(map:get($options, "normalize-space")) then normalize-space($nodeString) else $nodeString
 };
